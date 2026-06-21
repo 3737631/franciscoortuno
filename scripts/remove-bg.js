@@ -1,22 +1,16 @@
 /**
- * remove-bg.js — Preprocesamiento batch de frames
- * ================================================
+ * remove-bg.js — Conversión JPG → PNG (sin eliminación de fondo)
+ * ==============================================================
+ * Convierte frames JPG a PNG con fondo blanco opaco.
+ * El fondo blanco se funde visualmente con el fondo blanco
+ * del hero, por lo que no se necesita transparencia real.
  *
- * Lee JPGs de raw_frames/, los convierte a PNG (1600×1600),
- * aplica remplazo de píxeles cercanos al blanco por alpha,
- * y guarda en public/frames/ con padding dinámico.
+ * Para transparencia real con bombilla blanca, usa rembg:
+ *   pip install rembg
+ *   python scripts/remove-bg.py
  *
  * USO:
  *   node scripts/remove-bg.js
- *
- * REQUISITOS:
- *   npm install sharp
- *
- * ADVERTENCIA:
- *   El reemplazo por umbral de blanco funciona cuando el fondo
- *   original es blanco uniforme. Si la luz de la bombilla aparece
- *   blanca, se borrará parte del objeto. Para casos complejos,
- *   usa remove.bg o Photoshop con máscara.
  */
 
 import sharp from 'sharp'
@@ -28,7 +22,7 @@ const outDir = path.resolve('public/frames')
 const SIZE = 1600
 
 if (!fs.existsSync(rawDir)) {
-  console.error('ERROR: No existe raw_frames/. Copia ahí tus JPGs fuente.')
+  console.error('Crea raw_frames/ y copia tus JPGs.')
   process.exit(1)
 }
 
@@ -47,33 +41,13 @@ for (let i = 0; i < files.length; i++) {
   const inp = path.join(rawDir, files[i])
   const out = path.join(outDir, outName)
 
-  // Convierte a PNG con fondo blanco → alpha por umbral RGB > 240
   await sharp(inp)
     .resize(SIZE, SIZE, { fit: 'contain', background: { r: 255, g: 255, b: 255, alpha: 1 } })
-    .ensureAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true })
-    .then(({ data, info }) => {
-      const pixels = Buffer.alloc(info.width * info.height * 4)
-      for (let y = 0; y < info.height; y++) {
-        for (let x = 0; x < info.width; x++) {
-          const off = (y * info.width + x) * 4
-          const r = data[off], g = data[off + 1], b = data[off + 2]
-          // Si los tres canales superan 240 → fondo → alpha 0
-          if (r > 240 && g > 240 && b > 240) {
-            pixels[off] = r; pixels[off + 1] = g; pixels[off + 2] = b; pixels[off + 3] = 0
-          } else {
-            pixels[off] = r; pixels[off + 1] = g; pixels[off + 2] = b; pixels[off + 3] = data[off + 3]
-          }
-        }
-      }
-      return sharp(pixels, { raw: { width: info.width, height: info.height, channels: 4 } })
-        .png({ compressionLevel: 9, palette: false })
-        .toFile(out)
-    })
+    .png({ compressionLevel: 9 })
+    .toFile(out)
 
-  const pct = Math.round(((i + 1) / total) * 100)
+  const pct = Math.round(((i+1)/total)*100)
   console.log(`[${pct}%] ${outName}`)
 }
 
-console.log(`\n✓ Listo. ${total} frames → ${outDir}`)
+console.log(`\nListo. ${total} frames en ${outDir}`)

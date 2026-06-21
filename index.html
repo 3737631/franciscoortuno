@@ -6,49 +6,43 @@
   <title>Scroll Sequence</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Playfair+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
 </head>
 <body>
 
-  <!-- LOADER -->
   <div id="loader">
-    <div class="loader-content">
-      <div class="loader-bar-track">
-        <div class="loader-bar-fill" id="loaderBar"></div>
-      </div>
+    <div class="loader-content" style="text-align:center">
+      <div class="loader-track"><div class="loader-fill" id="loaderBar"></div></div>
       <p class="loader-text">Cargando <span id="loaderPercent">0</span>%</p>
     </div>
   </div>
 
-  <!-- HERO: visible al cargar, texto fade out al scrollear -->
   <section id="hero">
-    <div class="hero-layout">
+    <div class="cinema-bar-top"></div>
+    <div class="cinema-bar-bottom"></div>
+    <div class="hero-inner">
       <div class="hero-text" id="heroText">
-        <p class="hero-eyebrow" id="heroEyebrow">COLECCIÓN 2025</p>
+        <p class="hero-eyebrow" id="heroEyebrow">BOMBILLA EDICIÓN</p>
         <h1 class="hero-title" id="heroTitle">
-          <span>Nombre del</span>
-          <span>Producto</span>
+          <span>Luz</span>
+          <span>Inteligente</span>
         </h1>
-        <p class="hero-tagline" id="heroTagline">TAGLINE EDITABLE</p>
-        <div class="hero-dot"></div>
+        <p class="hero-tagline" id="heroTagline">ILUMINA TU ESPACIO</p>
       </div>
       <div class="hero-visual">
-        <div id="frame-container">
-          <canvas id="frameCanvas"></canvas>
-        </div>
+        <div id="frameContainer"></div>
       </div>
     </div>
+    <div class="hero-dot"></div>
   </section>
 
-  <!-- PISTA DE SCROLL (altura = viewport * multiplier) -->
   <div id="scrollTrack"></div>
 
-  <!-- SECCIONES POSTERIORES (placeholder, edítalas después) -->
   <section class="section light" id="section1">
     <div class="section-content">
       <p class="section-label">DETALLE</p>
       <h2 class="section-title">Ingeniería sin compromiso</h2>
-      <p class="section-text">Contenido editable. Aquí van las características del producto.</p>
+      <p class="section-text">Contenido editable — añade aquí las características de tu producto.</p>
     </div>
   </section>
 
@@ -56,12 +50,12 @@
     <div class="section-content">
       <p class="section-label">ESPECIFICACIONES</p>
       <h2 class="section-title">Diseñado para durar</h2>
-      <p class="section-text">Añade aquí los detalles técnicos, galería o CTA.</p>
+      <p class="section-text">Detalles técnicos, galería o call to action.</p>
     </div>
   </section>
 
   <footer class="footer">
-    <p>&copy; 2026 — Proyecto genérico de scroll-to-frame</p>
+    <p>&copy; 2026 — Proyecto genérico scroll-to-frame</p>
   </footer>
 
   <script type="module" src="/src/main.js"></script>

@@ -1,124 +1,124 @@
-/**
- * scroll-sequence.js — Núcleo genérico de precarga + mapeo scroll → frame + render
- * ==============================================================================
- * No asume NADA sobre el contenido de los frames. Solo carga imágenes,
- * calcula qué frame toca según scrollProgress, y lo dibuja en un canvas 2D.
- *
- * El canvas 2D se eligió sobre Three.js porque:
- *   - drawImage() es más directo y ligero para mostrar imágenes planas
- *   - No hay geometría 3D, iluminación ni materiales que gestionar
- *   - Menor consumo de CPU/GPU, importante en móviles con ~100 frames
- *   - Three.js quedaría reservado para un eventual fondo decorativo
- */
-
+import * as THREE from 'three'
 import { config } from './config.js'
 
-// Referencias DOM
-const canvas = document.getElementById('frameCanvas')
-const ctx = canvas.getContext('2d')
+const container = document.getElementById('frameContainer')
 const scrollTrack = document.getElementById('scrollTrack')
 const loaderEl = document.getElementById('loader')
 const loaderBar = document.getElementById('loaderBar')
-const loaderPercent = document.getElementById('loaderPercent')
+const loaderPct = document.getElementById('loaderPercent')
 
 const TF = config.totalFrames
-const padLength = String(TF).length
+const pad = String(TF).length
 
-let frames = []
-let loaded = 0
-let targetScroll = 0
-let smoothScroll = 0
-let currentFrameIndex = -1
-let canvasW = 0
-let canvasH = 0
-let frameAspect = 1
+// ── precarga imágenes ──────────────────────────────────────────
+export const ready = new Promise(resolve => {
+  const base = import.meta.env.BASE_URL || '/'
+  const dir = base + config.framesPath
+  const imgs = []
+  let loaded = 0
 
-// Promesa que se resuelve cuando todas las imágenes están cargadas
-export const ready = new Promise((resolve) => {
-  const paths = []
   for (let i = 1; i <= TF; i++) {
-    const p = String(i).padStart(padLength, '0')
-    paths.push(`${config.framesPath}${config.framePrefix}${p}${config.frameExtension}`)
-  }
-
-  frames = new Array(TF)
-  paths.forEach((src, idx) => {
+    const name = config.framePrefix + String(i).padStart(pad, '0') + config.frameExtension
     const img = new Image()
-    img.onload = () => {
+    img.crossOrigin = 'anonymous'
+    img.onload = img.onerror = () => {
       loaded++
       const pct = Math.round((loaded / TF) * 100)
-      loaderBar.style.width = `${pct}%`
-      loaderPercent.textContent = pct
+      loaderBar.style.width = pct + '%'
+      loaderPct.textContent = pct
       if (loaded === TF) {
-        frameAspect = img.naturalWidth / img.naturalHeight
-        setTimeout(() => { loaderEl.classList.add('hidden'); resolve() }, 400)
+        setTimeout(() => { loaderEl.classList.add('hidden'); resolve(imgs) }, 400)
       }
     }
-    img.onerror = () => {
-      loaded++
-      if (loaded === TF) { loaderEl.classList.add('hidden'); resolve() }
-    }
-    img.src = src
-    frames[idx] = img
-  })
+    img.src = dir + name
+    imgs.push(img)
+  }
 })
 
-export function init() {
-  setScrollHeight()
-  resizeCanvas()
-  window.addEventListener('resize', () => { setScrollHeight(); resizeCanvas() })
-  window.addEventListener('scroll', () => {
-    const rect = scrollTrack.getBoundingClientRect()
-    const start = rect.top + window.scrollY
-    const sh = scrollTrack.offsetHeight - window.innerHeight
-    targetScroll = sh > 0 ? (window.scrollY - start) / sh : 0
-    targetScroll = Math.max(0, Math.min(1, targetScroll))
-  }, { passive: true })
-}
+// ── Three.js ───────────────────────────────────────────────────
+const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true })
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+renderer.setClearColor(0x000000, 0)
+container.appendChild(renderer.domElement)
 
-function setScrollHeight() {
-  scrollTrack.style.height = `${window.innerHeight * config.scrollSectionHeightMultiplier}px`
-}
+const scene = new THREE.Scene()
+const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10)
+camera.position.z = 1
 
-function resizeCanvas() {
-  const w = window.innerWidth
-  const h = window.innerHeight
-  canvas.style.width = `${w}px`
-  canvas.style.height = `${h}px`
-  canvasW = w
-  canvasH = h
-  canvas.width = w
-  canvas.height = h
-}
+const geo = new THREE.PlaneGeometry(2, 2)
+const tex = new THREE.Texture()
+const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true })
+const mesh = new THREE.Mesh(geo, mat)
+scene.add(mesh)
 
-function drawFrame(index) {
-  if (index === currentFrameIndex) return
-  currentFrameIndex = index
-  const img = frames[index]
-  if (!img) return
+let imgAspect = 1
 
-  ctx.clearRect(0, 0, canvasW, canvasH)
-
-  const imgAspect = img.naturalWidth / img.naturalHeight
-  const canAspect = canvasW / canvasH
-  let dw, dh, ox, oy
-
-  if (imgAspect > canAspect) {
-    dw = canvasW; dh = canvasW / imgAspect
-    ox = 0; oy = (canvasH - dh) / 2
-  } else {
-    dh = canvasH; dw = canvasH * imgAspect
-    ox = (canvasW - dw) / 2; oy = 0
+// ── init ────────────────────────────────────────────────────────
+export function init(images) {
+  if (images[0]) {
+    imgAspect = images[0].naturalWidth / images[0].naturalHeight
+    tex.image = images[0]
+    tex.needsUpdate = true
   }
-  ctx.drawImage(img, ox, oy, dw, dh)
+  setScrollHeight()
+  resize()
+  window.addEventListener('resize', resize)
+  window.addEventListener('scroll', onScroll, { passive: true })
 }
 
-export function getProgress() {
-  return smoothScroll
+// ── scroll track ────────────────────────────────────────────────
+function setScrollHeight() {
+  scrollTrack.style.height = window.innerHeight * config.scrollSectionHeightMultiplier + 'px'
 }
 
-export function render() {
-  smoothScroll += (targetScroll - smoothScroll) * 0.1
-  const fi = Math.min(TF - 1, Math.max(0, Math.floor(smoothScroll * TF)))
-  drawFrame(fi)
+// ── resize ──────────────────────────────────────────────────────
+function resize() {
+  const w = container.clientWidth
+  const h = container.clientHeight
+  if (w === 0 || h === 0) return
+  renderer.setSize(w, h)
+
+  const ca = w / h
+  if (imgAspect > ca) {
+    mesh.scale.set(1, ca / imgAspect, 1)
+  } else {
+    mesh.scale.set(imgAspect / ca, 1, 1)
+  }
 }
+
+// ── scroll → frame ──────────────────────────────────────────────
+let targetScroll = 0
+let smoothScroll = 0
+let currentIndex = -1
+let images
+
+function onScroll() {
+  const rect = scrollTrack.getBoundingClientRect()
+  const start = rect.top + window.scrollY
+  const sh = scrollTrack.offsetHeight - window.innerHeight
+  targetScroll = sh > 0 ? (window.scrollY - start) / sh : 0
+  targetScroll = Math.max(0, Math.min(1, targetScroll))
+}
+
+// ── render loop ─────────────────────────────────────────────────
+export function startLoop(imgs) {
+  images = imgs
+  function loop() {
+    smoothScroll += (targetScroll - smoothScroll) * 0.1
+    const fi = Math.min(TF - 1, Math.floor(smoothScroll * TF))
+    if (fi !== currentIndex) {
+      currentIndex = fi
+      const img = images[fi]
+      if (img && img.complete) {
+        tex.image = img
+        tex.needsUpdate = true
+      }
+    }
+    renderer.render(scene, camera)
+    requestAnimationFrame(loop)
+  }
+  loop()
+}
+
+// ── helpers ─────────────────────────────────────────────────────
+export function getProgress() { return smoothScroll }

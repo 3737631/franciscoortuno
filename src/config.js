@@ -1,26 +1,18 @@
-/**
- * config.js — ÚNICO archivo de configuración
- * ============================================
- * Cambia aquí textos, colores, rutas y número de frames.
- * No necesitas tocar ningún otro archivo para personalizar.
- */
 export const config = {
   // ─── FRAMES ──────────────────────────────────────────────────
   totalFrames: 126,
-  framesPath: '/franciscoortuno/frames/',
+  framesPath: 'frames/',       // relativo, se combina con BASE_URL
   framePrefix: 'frame_',
   frameExtension: '.png',
-  // Altura de la pista de scroll = viewportHeight * scrollSectionHeightMultiplier
-  scrollSectionHeightMultiplier: 20,
+  scrollSectionHeightMultiplier: 4, // bajo = animación rápida al scrollear
 
   // ─── HERO ────────────────────────────────────────────────────
   hero: {
-    eyebrow: 'COLECCIÓN 2025',
-    title: ['Nombre del', 'Producto'],
-    tagline: 'TAGLINE EDITABLE',
+    eyebrow: 'BOMBILLA EDICIÓN',
+    title: ['Luz', 'Inteligente'],
+    tagline: 'ILUMINA TU ESPACIO',
   },
 
   // ─── COLORES ─────────────────────────────────────────────────
   accentColor: '#b8975a',
-  // ─── FIN CONFIGURACIÓN ───────────────────────────────────────
 }
