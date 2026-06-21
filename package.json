@@ -1,7 +1,7 @@
 {
   "name": "scroll-landing",
   "private": true,
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,6 +12,7 @@
     "three": "^0.170.0"
   },
   "devDependencies": {
+    "sharp": "^0.35.2",
     "vite": "^6.0.0"
   }
 }

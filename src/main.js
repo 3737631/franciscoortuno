@@ -1,43 +1,30 @@
 /**
- * main.js
- * =======
- * Punto de entrada de la aplicación.
- * Inicializa el fondo Three.js, la secuencia de frames y arranca
- * el loop principal con requestAnimationFrame.
+ * main.js — Punto de entrada
+ * Inicializa scroll-sequence y el loop de render.
  */
 
-import * as sequence from './scroll-sequence.js'
-import * as background from './background-scene.js'
 import './style.css'
+import { config } from './config.js'
+import * as seq from './scroll-sequence.js'
+import * as heroText from './hero-text.js'
 
-// ─── Inicialización ───────────────────────────────────────────────
-const bgCanvas = document.getElementById('bg-canvas')
+// Pasar accentColor al CSS
+document.documentElement.style.setProperty('--accent', config.accentColor)
 
-// Iniciar fondo Three.js inmediatamente (no necesita precarga)
-background.init(bgCanvas)
+async function boot() {
+  await seq.ready       // esperar precarga de frames
+  seq.init()            // configurar scroll track, canvas, listeners
+  heroText.init()
 
-// Inicializar la lógica de scroll y frames (altura del track, canvas)
-sequence.init()
-
-// ─── Loop principal ───────────────────────────────────────────────
-// Usamos un reloj de rendimiento para evitar acumulación de frames
-let lastTime = 0
-
-function loop(time) {
-  requestAnimationFrame(loop)
-
-  // Convertir a segundos
-  const t = time * 0.001
-
-  // Renderizar fondo Three.js
-  background.render(t)
-
-  // Renderizar frame actual (canvas 2D)
-  sequence.render()
+  function loop() {
+    seq.render()
+    heroText.render(seq.getProgress ? seq.getProgress() : 0)
+    requestAnimationFrame(loop)
+  }
+  loop()
 }
 
-// Esperar a que todas las imágenes estén precargadas y arrancar
-sequence.ready.then(() => {
-  document.body.classList.add('loaded')
-  loop(0)
-})
+boot()
+
+// Helper por si hero-text necesita el progreso exacto
+// (se podría reemplazar por un observable, pero así es más simple)
