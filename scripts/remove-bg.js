@@ -1,8 +1,14 @@
 /**
- * Script de preprocesado con remoción de fondo por umbral de color
- * Útil si los fondos son claros/blancos (típico en renders de producto)
+ * Script de preprocesado de imágenes
+ * Convierte JPG → PNG (1600x1600) con remoción de fondo por umbral
+ *
+ * REQUISITO: npm install sharp
  *
  * Uso: node scripts/remove-bg.js
+ *
+ * Ajusta BG_THRESHOLD si el fondo no se quita bien:
+ *   - Valor más bajo (ej. 180) = más agresivo (quita más)
+ *   - Valor más alto (ej. 240) = más conservador (quita menos)
  */
 
 import sharp from 'sharp'
@@ -17,12 +23,8 @@ const OUTPUT_DIR = path.join(PROJECT_ROOT, 'public', 'frames')
 const TARGET_SIZE = 1600
 const TOTAL_FRAMES = 126
 
-// ─── CONFIGURACIÓN DEL UMBRAL DE FONDO ────────────────────────────
-// Si el fondo de tus imágenes es blanco o gris claro,
-// estos valores controlan qué píxeles se vuelven transparentes:
-const BG_THRESHOLD = 200  // Píxeles con R,G,B > este valor → transparentes
-const EDGE_FEATHER = 30   // Suavizado en bordes (transición gradual)
-// ─────────────────────────────────────────────────────────────────
+const BG_THRESHOLD = 200
+const EDGE_FEATHER = 30
 
 async function removeBackground(inputBuffer) {
   const { data, info } = await sharp(inputBuffer)
@@ -47,17 +49,13 @@ async function removeBackground(inputBuffer) {
       output[oIdx + 1] = g
       output[oIdx + 2] = b
 
-      // Calcular qué tan lejos está del umbral de fondo
       const minChannel = Math.min(r, g, b)
       if (minChannel > BG_THRESHOLD) {
-        // Muy probablemente fondo → completamente transparente
         output[oIdx + 3] = 0
       } else if (minChannel > BG_THRESHOLD - EDGE_FEATHER) {
-        // Zona de transición → alpha progresivo
         const t = (minChannel - (BG_THRESHOLD - EDGE_FEATHER)) / EDGE_FEATHER
         output[oIdx + 3] = Math.round((1 - t) * 255)
       } else {
-        // Objeto → opaco
         output[oIdx + 3] = 255
       }
     }
@@ -69,12 +67,25 @@ async function removeBackground(inputBuffer) {
 }
 
 async function main() {
+  // Verificar que sharp esté instalado
+  try {
+    const s = await import('sharp')
+  } catch {
+    console.error('❌ sharp no está instalado. Ejecuta: npm install sharp')
+    process.exit(1)
+  }
+
   fs.mkdirSync(OUTPUT_DIR, { recursive: true })
 
   const files = fs.readdirSync(INPUT_DIR)
     .filter(f => f.endsWith('.jpg'))
     .sort()
     .slice(0, TOTAL_FRAMES)
+
+  if (files.length === 0) {
+    console.error(`❌ No se encontraron JPG en: ${INPUT_DIR}`)
+    process.exit(1)
+  }
 
   console.log(`✓ Encontrados ${files.length} JPG. Procesando...`)
 
@@ -93,12 +104,8 @@ async function main() {
 
     try {
       const inputBuffer = fs.readFileSync(inputPath)
-
-      // Quitar fondo por umbral de color
       const imgNoBg = await removeBackground(inputBuffer)
 
-      // Crear canvas transparente y centrar
-      const meta = await imgNoBg.metadata()
       const result = await sharp({
         create: {
           width: TARGET_SIZE,
@@ -114,16 +121,15 @@ async function main() {
         .png({ compressionLevel: 9 })
         .toFile(outputPath)
 
-      const sizeKB = (result.size / 1024).toFixed(1)
-      console.log(`    ✓ Guardado (${sizeKB} KB)`)
+      console.log(`    ✓ Guardado (${(result.size / 1024).toFixed(1)} KB)`)
     } catch (err) {
       console.error(`    ✗ Error: ${err.message}`)
     }
   }
 
-  console.log(`\n✅ ¡Listo! ${TOTAL_FRAMES} frames procesados en: ${OUTPUT_DIR}`)
-  console.log(`   Umbral de fondo: RGB > ${BG_THRESHOLD} = transparente`)
-  console.log('   Si el resultado no es bueno, ajusta BG_THRESHOLD en el script.')
+  console.log(`\n✅ ¡Listo! ${TOTAL_FRAMES} frames en: ${OUTPUT_DIR}`)
+  console.log(`   Umbral: RGB > ${BG_THRESHOLD} = transparente`)
+  console.log('   Si no queda bien, ajusta BG_THRESHOLD y vuelve a ejecutar.')
 }
 
 main().catch(console.error)
