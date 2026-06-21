@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Landing · Scroll Animation</title>
+
+  <!-- Google Font: Inter (tipografía moderna, estilo Apple) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ─── PANTALLA DE CARGA ────────────────────────────────────── -->
+  <div id="loader">
+    <div class="loader-content">
+      <div class="loader-bar-track">
+        <div class="loader-bar-fill" id="loaderBar"></div>
+      </div>
+      <p class="loader-text">
+        Cargando <span id="loaderPercent">0</span>%
+      </p>
+    </div>
+  </div>
+
+  <!-- ─── PISTA DE SCROLL ──────────────────────────────────────── -->
+  <!--
+    La altura de este contenedor define cuánto hay que scrollear
+    para recorrer todos los frames.
+    Ajusta SCROLL_MULTIPLIER en scroll-sequence.js para cambiar
+    la sensibilidad (más alto = más scroll necesario).
+  -->
+  <div id="scroll-track">
+
+    <!-- Contenedor sticky: se queda fijo en pantalla mientras scrolleamos -->
+    <div id="sticky-container">
+
+      <!-- Canvas de Three.js (fondo decorativo) -->
+      <canvas id="bg-canvas"></canvas>
+
+      <!-- Canvas 2D (muestra el frame actual) -->
+      <canvas id="frame-canvas"></canvas>
+
+      <!-- ─── BLOQUES DE TEXTO SUPERPUESTOS ──────────────────── -->
+      <!--
+        CADA BLOQUE TIENE UN data-start Y data-end (0.0 - 1.0)
+        que define el rango de scrollProgress donde es visible.
+        Cambia el texto y los rangos según necesites.
+      -->
+
+      <!-- Bloque 1: Título principal (0% - 20%) -->
+      <div class="text-block" data-start="0.00" data-end="0.20">
+        <h1 class="title">Producto<br/>Revolucionario</h1>
+        <p class="subtitle">Hecho para quienes no se conforman</p>
+      </div>
+
+      <!-- Bloque 2: Característica (35% - 55%) -->
+      <div class="text-block" data-start="0.35" data-end="0.55">
+        <p class="feature-label">Diseño sin precedentes</p>
+        <h2 class="feature-title">Cada detalle importa</h2>
+        <p class="feature-desc">Materiales premium. Ingeniería de precisión.<br/>Probado hasta el límite.</p>
+      </div>
+
+      <!-- Bloque 3: CTA final (80% - 100%) -->
+      <div class="text-block cta-block" data-start="0.80" data-end="1.00">
+        <p class="cta-label">Ya disponible</p>
+        <h2 class="cta-title">El futuro es ahora</h2>
+        <p class="cta-sub">Descubre lo que somos capaces de crear.</p>
+      </div>
+
+      <!-- Indicador de scroll (se desvanece al empezar a scrollear) -->
+      <div id="scroll-indicator">
+        <span>Scroll para continuar</span>
+        <div class="scroll-arrow"></div>
+      </div>
+
+    </div><!-- /sticky-container -->
+  </div><!-- /scroll-track -->
+
+  <!-- Script principal (módulo ES con Vite) -->
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,284 @@
+/* ═══════════════════════════════════════════════════════════════════
+   style.css — Estilos de la Landing Page
+   ═══════════════════════════════════════════════════════════════════
+   Paleta: modo oscuro, tonos azul-púrpura oscuros, acento claro.
+   Tipografía: Inter (sistema/Google Fonts, estilo Apple).
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Reset y base ─────────────────────────────────────────────── */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: auto; /* Nosotros controlamos el scroll */
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #06060e;
+  color: #f0f0f5;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Loader / Pantalla de carga ───────────────────────────────── */
+#loader {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #06060e;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+
+#loader.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loader-content {
+  text-align: center;
+  width: 260px;
+}
+
+.loader-bar-track {
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.loader-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #6366f1, #a78bfa);
+  border-radius: 4px;
+  transition: width 0.15s ease;
+}
+
+.loader-text {
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.5px;
+}
+
+/* ─── Pista de scroll ──────────────────────────────────────────── */
+#scroll-track {
+  position: relative;
+  width: 100%;
+  /* height se define dinámicamente en JS */
+}
+
+/* ─── Contenedor sticky ─────────────────────────────────────────── */
+#sticky-container {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ─── Canvas de Three.js (fondo) ────────────────────────────────── */
+#bg-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 0;
+}
+
+/* ─── Canvas 2D (frames) ────────────────────────────────────────── */
+#frame-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 1;
+  /* La imagen se dibuja centrada y con aspect ratio respetado */
+}
+
+/* ─── Bloques de texto superpuestos ─────────────────────────────── */
+.text-block {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.1s ease;
+  will-change: opacity;
+}
+
+/* Bloque 1: Título principal (centrado) */
+.text-block:first-of-type {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.title {
+  font-size: clamp(2.5rem, 8vw, 6rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #f0f0f5 0%, #a78bfa 50%, #6366f1 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 16px;
+}
+
+.subtitle {
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.02em;
+}
+
+/* Bloque 2: Característica (izquierda) */
+.text-block:nth-of-type(2) {
+  top: 50%;
+  left: 8%;
+  transform: translateY(-50%);
+  max-width: 420px;
+}
+
+.feature-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #a78bfa;
+  margin-bottom: 12px;
+}
+
+.feature-title {
+  font-size: clamp(1.5rem, 4vw, 2.8rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+  line-height: 1.2;
+}
+
+.feature-desc {
+  font-size: clamp(0.875rem, 1.5vw, 1.05rem);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.6;
+}
+
+/* Bloque 3: CTA (derecha) */
+.text-block:nth-of-type(3) {
+  top: 50%;
+  right: 8%;
+  transform: translateY(-50%);
+  text-align: right;
+  max-width: 400px;
+}
+
+.cta-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #a78bfa;
+  margin-bottom: 12px;
+}
+
+.cta-title {
+  font-size: clamp(1.5rem, 4vw, 2.8rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+  line-height: 1.2;
+}
+
+.cta-sub {
+  font-size: clamp(0.875rem, 1.5vw, 1.05rem);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.6;
+}
+
+/* ─── Responsive: en móvil, los bloques se centran ─────────────── */
+@media (max-width: 768px) {
+  .text-block:nth-of-type(2),
+  .text-block:nth-of-type(3) {
+    left: 5%;
+    right: 5%;
+    text-align: center;
+    max-width: none;
+  }
+
+  .title {
+    font-size: clamp(2rem, 10vw, 3.5rem);
+  }
+}
+
+/* ─── Indicador de scroll ───────────────────────────────────────── */
+#scroll-indicator {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: 1;
+  transition: opacity 0.4s ease;
+  pointer-events: auto;
+}
+
+#scroll-indicator span {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.scroll-arrow {
+  width: 20px;
+  height: 20px;
+  border-right: 2px solid rgba(255, 255, 255, 0.3);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+  transform: rotate(45deg);
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: rotate(45deg) translate(0, 0); opacity: 0.4; }
+  50% { transform: rotate(45deg) translate(4px, 4px); opacity: 1; }
+}
+
+/* ─── Scrollbar personalizado (sutil) ───────────────────────────── */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+/* ─── Clase auxiliar para fade inicial ─────────────────────────── */
+body:not(.loaded) {
+  overflow: hidden;
+}
