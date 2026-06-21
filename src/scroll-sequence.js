@@ -58,10 +58,11 @@ export const ready = new Promise((resolve) => {
    * Genera las rutas dinámicamente y precarga las imágenes.
    * Las rutas son relativas a /public/frames/ (servido por Vite).
    */
+  const base = import.meta.env.BASE_URL || '/'
   const paths = []
   for (let i = 1; i <= TOTAL_FRAMES; i++) {
     const padded = String(i).padStart(PAD, '0')
-    paths.push(`/frames/frame_${padded}.png`)
+    paths.push(`${base}frames/frame_${padded}.png`)
   }
 
   totalLoaded = 0
