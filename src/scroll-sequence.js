@@ -36,9 +36,9 @@ export const ready = new Promise(resolve => {
 })
 
 // ── Three.js ───────────────────────────────────────────────────
-const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true })
+const renderer = new THREE.WebGLRenderer({ antialias: true })
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-renderer.setClearColor(0x000000, 0)
+renderer.setClearColor(0xffffff, 1)
 container.appendChild(renderer.domElement)
 
 const scene = new THREE.Scene()
@@ -47,7 +47,7 @@ camera.position.z = 1
 
 const geo = new THREE.PlaneGeometry(2, 2)
 const tex = new THREE.Texture()
-const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true })
+const mat = new THREE.MeshBasicMaterial({ map: tex })
 const mesh = new THREE.Mesh(geo, mat)
 scene.add(mesh)
 

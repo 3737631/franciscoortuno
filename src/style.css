@@ -139,13 +139,6 @@ body {
   position: relative;
   margin-left: -5%; /* desborde izquierdo para solapamiento */
 }
-#frameContainer canvas {
-  display: block;
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: contain;
-}
-
 /* ── SCROLL TRACK ───────────────────────────────────────────────── */
 #scrollTrack {
   position: relative; z-index: 0;
